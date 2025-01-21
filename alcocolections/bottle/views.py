@@ -1,7 +1,9 @@
 from django.http import HttpResponse, HttpResponseNotFound, Http404, HttpResponseRedirect, HttpResponsePermanentRedirect
-from django.shortcuts import redirect, render
+from django.shortcuts import redirect, render, get_object_or_404
 from django.template.loader import render_to_string
 from django.urls import reverse
+
+from alcocolections.bottle.models import Minion
 
 menu = [
     {'title': 'О сайте', 'url_name': 'about'},
@@ -44,7 +46,16 @@ def about(request):
 
 
 def show_minions(request, minion_id):
-    return HttpResponse(f'Вот миньен с id - {minion_id}')
+    minion = get_object_or_404(Minion, pk=minion_id)
+
+    data = {
+        'name': minion.name,
+        'menu': menu,
+        'minion': minion,
+        'cat_selected': 1,
+    }
+
+    return render(request, 'bottle/minion.html', context=data)
 
 
 def addminion(request):

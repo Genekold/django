@@ -12,7 +12,13 @@ class Minion(models.Model):
     country = models.CharField(max_length=255, verbose_name='Место производства', blank=True, null=True)
     manufacturer = models.CharField(max_length=50, verbose_name='Завод изготовитель',  blank=True, null=True)
     price = models.IntegerField(verbose_name='Цена миньёна')
-    photo = models.BooleanField(verbose_name='Фото', default=False)
+    photo = models.BooleanField(verbose_name='Фото', default=True)
 
     def __str__(self):
         return self.name
+
+    class Meta:
+        ordering = ["-data_purchase"]
+        indexes = [
+            models.Index(fields=['-data_purchase'])
+        ]
