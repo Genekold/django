@@ -1,3 +1,7 @@
 from django.contrib import admin
 
-# Register your models here.
+from .models import Minion
+
+@admin.register(Minion)
+class MinionAdmin(admin.ModelAdmin):
+    list_display = ('pk', 'name', 'data_purchase', 'volume', 'strength', 'price')

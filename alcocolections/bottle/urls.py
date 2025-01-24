@@ -13,6 +13,7 @@ urlpatterns = [
     path('addminion/', views.addminion, name='add_minion'),
     path('contact/', views.contact, name='contact'),
     path('login/', views.login, name='login'),
-    path('minion/<int:minion_id>/', views.show_minions, name='minion'),
-    path('category/<int:cat_id>/', views.show_category, name='category'),
+    path('minion/<slug:minion_slug>/', views.show_minions, name='minion'),
+    path('category/<slug:cat_slug>/', views.show_category, name='category'),
+    path('tag/<slug:tag_slug>/', views.show_tag_minionlist, name='tag')
 ]

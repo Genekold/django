@@ -3,15 +3,20 @@
 {% block content %}
 <ul class="list-articles">
     {% for minion in minions %}
-    {% if minion.photo %}
-    <li><h2>{{ minion.name }}</h2>
+
+    <li>
+        <div class="article-panel">
+            <p class="first">{{ minion.cat.name }}</p>
+            <p class="last">Дата регистрации: {{ minion.date_reg|date:"d-m-Y" }}</p>
+        </div>
+        <h2>{{ minion.name }}</h2>
         {% autoescape off %}
-        {{ minion.description|truncatewords:10 }}
+        {{ minion.description|linebreaks|truncatewords:10 }}
         {% endautoescape %}
         <div class="clear"></div>
-        <p class="link-read-post"><a href="{% url 'minion' minion.id %}">Подробно</a></p>
+        <p class="link-read-post">Цена: {{ minion.price }}</p>
+        <p class="link-read-post"><a href="{{ minion.get_absolute_url }}">Подробно</a></p>
     </li>
-    {% endif %}
     {% endfor %}
 </ul>
 {% endblock %}

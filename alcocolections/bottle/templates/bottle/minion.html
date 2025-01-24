@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+
+{% block breadcrumbs %}
+<!-- Теги -->
+{% with minion.tags.all as tags %}
+{% if tags %}
+<ul class="tags-list">
+    <li>Теги:</li>
+    {% for t in tags %}
+    <li><a href="{{ t.get_absolut_url }}">{{ t.tag }}</a></li>
+    {% endfor %}
+</ul>
+{% endif %}
+{% endwith %}
+{% endblock %}
+
+{% block content %}
+<h1>{{ minion.name }}</h1>
+
+{% if minion.photos %}
+<p><img class="img-article-left" src="{{ minion.photos }}"></p>
+{% endif %}
+
+{{ minion.description|linebreaks }}
+{% endblock %}
