@@ -14,7 +14,7 @@ menu = [
 
 
 def index(request):
-    minions = Minion.manager.all()
+    minions = Minion.manager.all().select_related('cat')
     data = {
         'title': 'Главная страница',
         'menu': menu,
@@ -55,7 +55,8 @@ def login(request):
 
 def show_category(request, cat_slug):
     category = get_object_or_404(Category, slug=cat_slug)
-    minions = Minion.manager.filter(cat_id=category.pk)
+    minions = Minion.manager.filter(cat_id=category.pk).select_related('cat')
+
     data = {
         'title': category.name,
         'menu': menu,
@@ -71,7 +72,7 @@ def page_not_found(request, exception):
 
 def show_tag_minionlist(request, tag_slug):
     tag = get_object_or_404(TagMinion, slug=tag_slug)
-    minions = tag.tags.filter(photo=Minion.StatusPhoto.YES)
+    minions = tag.tags.filter(photo=Minion.StatusPhoto.YES).select_related('cat')
 
     data = {
         'title': f'Тэг: {tag.tag}',

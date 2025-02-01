@@ -17,11 +17,15 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from bottle.views import page_not_found
+from debug_toolbar.toolbar import debug_toolbar_urls
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', include('bottle.urls')),
-]
+    path('', include('bottle.urls'))
+] + debug_toolbar_urls()
 
 
 handler404 = page_not_found
+
+admin.site.site_header = 'Панель администратора'
+admin.site.index_title = 'Все миньены'
