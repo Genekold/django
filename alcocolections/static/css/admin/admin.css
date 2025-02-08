@@ -1,7 +1,7 @@
-#header, .object-tools a.addlink, #content {
+#header, .object-tools {
     background: #91448d
 }
 
-h1 {
-    text: orange
+#content h1 {
+    color: orange
 }

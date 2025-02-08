@@ -7,8 +7,11 @@
     <li>
         <div class="article-panel">
             <p class="first">{{ minion.cat.name }}</p>
-            <p class="last">Дата регистрации: {{ minion.date_reg|date:"d-m-Y H:M:s" }}</p>
+            <p class="last">Дата регистрации: {{ minion.date_reg|date:"d-m-Y H:m:s" }}</p>
         </div>
+        {% if minion.photo %}
+        <p><img class="img-article-left thumb" src="{{ minion.photo.url }}"></p>
+        {% endif %}
         <h2>{{ minion.name }}</h2>
         {% autoescape off %}
         {{ minion.description|linebreaks|truncatewords:10 }}

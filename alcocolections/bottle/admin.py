@@ -2,6 +2,7 @@ from django.contrib import admin, messages
 
 from .models import Minion, Category
 
+
 class BigFilter(admin.SimpleListFilter):
     title = 'Статаус BIG'
     parameter_name = 'status'
@@ -18,16 +19,18 @@ class BigFilter(admin.SimpleListFilter):
         if self.value() == 'nobig':
             return queryset.filter(bigminion__isnull=True)
 
+
 @admin.register(Minion)
 class MinionAdmin(admin.ModelAdmin):
-    list_display = ( 'name', 'date_reg', 'volume', 'strength', 'slug', 'price', 'photo', 'cat', 'brief_info')
+    list_display = ('name', 'photo', 'date_reg', 'volume', 'strength', 'slug', 'price', 'is_active', 'cat', 'brief_info')
     list_display_links = ('name',)
-    ordering = ['date_reg', 'name']
-    list_editable = ('photo',)
+    ordering = ['-date_reg', 'name']
+    list_editable = ('is_active',)
     list_per_page = 5
     actions = ['set_photo', 'no_set_photo']
     search_fields = ['name__startswith', 'cat__name']
-    list_filter = [BigFilter, 'cat__name', 'photo']
+    list_filter = [BigFilter, 'cat__name', 'is_active']
+    empty_value_display = "-empty-"
 
     @admin.display(description='Длина', ordering='description')
     def brief_info(self, bottle: Minion):
@@ -35,12 +38,12 @@ class MinionAdmin(admin.ModelAdmin):
 
     @admin.action(description='Сделать "Есть фото"')
     def set_photo(self, request, queryset):
-        count = queryset.update(photo=Minion.StatusPhoto.YES)
+        count = queryset.update(is_active=Minion.StatusPhoto.YES)
         self.message_user(request, f'Изменено {count} записей.')
 
     @admin.action(description='Сделать "Нет фото"')
     def no_set_photo(self, request, queryset):
-        count = queryset.update(photo=Minion.StatusPhoto.NO)
+        count = queryset.update(is_active=Minion.StatusPhoto.NO)
         self.message_user(request, f'Изменено {count} записей.', messages.WARNING)
 
 

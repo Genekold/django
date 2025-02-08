@@ -1,9 +1,13 @@
+import uuid
+
+from django.contrib import messages
 from django.http import HttpResponse, HttpResponseNotFound, Http404, HttpResponseRedirect, HttpResponsePermanentRedirect
 from django.shortcuts import redirect, render, get_object_or_404
 from django.template.loader import render_to_string
 from django.urls import reverse
 
-from .models import Minion, Category, TagMinion
+from .forms import AddMinionForm, UploadFileForm
+from .models import Minion, Category, TagMinion, UploadFiles
 
 menu = [
     {'title': 'О сайте', 'url_name': 'about'},
@@ -24,8 +28,22 @@ def index(request):
     return render(request, 'bottle/index.html', context=data)
 
 
+# def handle_uploaded_file(f):
+#     name_uuid = uuid.uuid4()
+#     with open(f"uploads/{name_uuid}.jpg", "wb+") as destination:
+#         for chunk in f.chunks():
+#             destination.write(chunk)
+#
+
 def about(request):
-    return render(request, 'bottle/about.html', {'title': 'О сайте', 'menu': menu})
+    if request.method == "POST":
+        form = UploadFileForm(request.POST, request.FILES)
+        if form.is_valid():
+            fp = UploadFiles(file=form.cleaned_data['file'])
+            fp.save()
+    else:
+        form = UploadFileForm()
+    return render(request, 'bottle/about.html', {'title': 'О сайте', 'form': form, 'menu': menu})
 
 
 def show_minions(request, minion_slug):
@@ -42,7 +60,25 @@ def show_minions(request, minion_slug):
 
 
 def addminion(request):
-    return HttpResponse('Добавление пузыречка')
+    if request.method == 'POST':
+        form = AddMinionForm(request.POST, request.FILES)
+        if form.is_valid():
+            # print(form.cleaned_data)
+            # try:
+            #     Minion.objects.create(**form.cleaned_data)
+            #     return redirect('home')
+            # except:
+            #     form.add_error(None, 'Ошибка')
+            form.save()
+            return redirect('home')
+    else:
+        form = AddMinionForm()
+    data = {
+        'menu': menu,
+        'title': 'Добавление пузыречка',
+        'form': form,
+    }
+    return render(request, 'bottle/addminion.html', context=data)
 
 
 def contact(request):
@@ -72,7 +108,7 @@ def page_not_found(request, exception):
 
 def show_tag_minionlist(request, tag_slug):
     tag = get_object_or_404(TagMinion, slug=tag_slug)
-    minions = tag.tags.filter(photo=Minion.StatusPhoto.YES).select_related('cat')
+    minions = tag.tags.filter(is_active=Minion.StatusPhoto.YES).select_related('cat')
 
     data = {
         'title': f'Тэг: {tag.tag}',

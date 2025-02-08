@@ -17,8 +17,8 @@
 {% block content %}
 <h1>{{ minion.name }}</h1>
 
-{% if minion.photos %}
-<p><img class="img-article-left" src="{{ minion.photos }}"></p>
+{% if minion.photo %}
+<p><img class="img-article-left" src="{{ minion.photo.url }}"></p>
 {% endif %}
 
 {{ minion.description|linebreaks }}
