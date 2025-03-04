@@ -15,6 +15,12 @@
 {% endblock %}
 
 {% block content %}
+<button type="submit">
+    <span><a href="{% url 'confirm_delete' minion.slug %}" class="color-red fa-solid fa-trash">Удалить</a></span>
+</button>
+<button type="submit">
+    <span><a href="{% url 'edit' minion.slug %}" class="color-red fa-solid fa-pencil">Редактировать</a></span>
+</button>
 <h1>{{ minion.name }}</h1>
 
 {% if minion.photo %}

@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1>{{title}}</h1>
+<form action="" method="POST">
+    {% csrf_token %}
+    <p>Действительно удалить '{{ minion.name }}'</p>
+    <button type="submit">Удалить</button>
+    <p><a href="{% url 'home' %}">Отмена</button></a></p>
+</form>
+{{ message }}
+{% endblock %}

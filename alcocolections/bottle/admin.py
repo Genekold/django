@@ -1,4 +1,5 @@
 from django.contrib import admin, messages
+from django.utils.safestring import mark_safe
 
 from .models import Minion, Category
 
@@ -22,7 +23,9 @@ class BigFilter(admin.SimpleListFilter):
 
 @admin.register(Minion)
 class MinionAdmin(admin.ModelAdmin):
-    list_display = ('name', 'photo', 'date_reg', 'volume', 'strength', 'slug', 'price', 'is_active', 'cat', 'brief_info')
+    fields = ['id', 'name', 'photo', 'minion_photo', 'volume', 'strength', 'slug', 'price', 'cat', 'tags']
+    readonly_fields = ['minion_photo']
+    list_display = ('id', 'name', 'minion_photo', 'date_reg', 'volume', 'strength', 'slug', 'price', 'is_active', 'cat')
     list_display_links = ('name',)
     ordering = ['-date_reg', 'name']
     list_editable = ('is_active',)
@@ -30,11 +33,13 @@ class MinionAdmin(admin.ModelAdmin):
     actions = ['set_photo', 'no_set_photo']
     search_fields = ['name__startswith', 'cat__name']
     list_filter = [BigFilter, 'cat__name', 'is_active']
-    empty_value_display = "-empty-"
+    save_on_top = True
 
-    @admin.display(description='Длина', ordering='description')
-    def brief_info(self, bottle: Minion):
-        return f'Всего {len(bottle.name)} символов'
+    @admin.display(description='Фото', ordering='description')
+    def minion_photo(self, bottle: Minion):
+        if bottle.photo:
+            return mark_safe(f"<img src='{bottle.photo.url}' width=100>")
+        return 'Без фото'
 
     @admin.action(description='Сделать "Есть фото"')
     def set_photo(self, request, queryset):

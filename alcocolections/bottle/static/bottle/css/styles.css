@@ -1,3 +1,4 @@
+
 html, body {
 	font-family: 'Arial';
 	margin: 0;
@@ -75,8 +76,7 @@ ul.list-articles li {
 
 .clear {clear: both;}
 
- {
- {
+.header {
 	background: #3F4137;
 	height: 60px;
 }

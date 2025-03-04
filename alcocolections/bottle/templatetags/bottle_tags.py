@@ -14,4 +14,4 @@ def show_categories(cat_selected=0):
 
 @register.inclusion_tag('bottle/list_tags.html')
 def show_all_tags():
-    return {"tags": TagMinion.objects.annotate(total=Count('tags')).filter(total__gt=0)}
+    return {"tags": TagMinion.objects.annotate(total=Count('minions')).filter(total__gt=0)}

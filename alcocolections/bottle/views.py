@@ -4,36 +4,24 @@ from django.contrib import messages
 from django.http import HttpResponse, HttpResponseNotFound, Http404, HttpResponseRedirect, HttpResponsePermanentRedirect
 from django.shortcuts import redirect, render, get_object_or_404
 from django.template.loader import render_to_string
-from django.urls import reverse
+from django.urls import reverse, reverse_lazy
+from django.views import View
+from django.views.generic import TemplateView, ListView, DetailView, FormView, CreateView, UpdateView, DeleteView
 
 from .forms import AddMinionForm, UploadFileForm
 from .models import Minion, Category, TagMinion, UploadFiles
-
-menu = [
-    {'title': 'О сайте', 'url_name': 'about'},
-    {'title': 'Добавить миньёна', 'url_name': 'add_minion'},
-    {'title': 'Обратная связь', 'url_name': 'contact'},
-    {'title': 'Войти', 'url_name': 'login'}
-]
+from .utils import DataMixin
 
 
-def index(request):
-    minions = Minion.manager.all().select_related('cat')
-    data = {
-        'title': 'Главная страница',
-        'menu': menu,
-        'minions': minions,
-        'cat_selected': 0,
-    }
-    return render(request, 'bottle/index.html', context=data)
+class MinionHome(DataMixin, ListView):
+    template_name = 'bottle/index.html'
+    context_object_name = 'minions'
+    title_page = 'Главная страница'
+    cat_selected = 0
 
+    def get_queryset(self):
+        return Minion.manager.all().prefetch_related('cat')
 
-# def handle_uploaded_file(f):
-#     name_uuid = uuid.uuid4()
-#     with open(f"uploads/{name_uuid}.jpg", "wb+") as destination:
-#         for chunk in f.chunks():
-#             destination.write(chunk)
-#
 
 def about(request):
     if request.method == "POST":
@@ -43,42 +31,40 @@ def about(request):
             fp.save()
     else:
         form = UploadFileForm()
-    return render(request, 'bottle/about.html', {'title': 'О сайте', 'form': form, 'menu': menu})
+    return render(request, 'bottle/about.html', {'title': 'О сайте', 'form': form})
 
 
-def show_minions(request, minion_slug):
-    minion = get_object_or_404(Minion, slug=minion_slug)
+class ShowMinion(DataMixin, DetailView):
+    template_name = 'bottle/minion.html'
+    slug_url_kwarg = 'minion_slug'
+    context_object_name = 'minion'
 
-    data = {
-        'name': minion.name,
-        'menu': menu,
-        'minion': minion,
-        'cat_selected': 1,
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        return self.get_mixin_context(context, title=context['minion'].name)
 
-    }
-    return render(request, 'bottle/minion.html', context=data)
+    def get_object(self, queryset=None):
+        return get_object_or_404(Minion.manager, slug=self.kwargs[self.slug_url_kwarg])
 
 
-def addminion(request):
-    if request.method == 'POST':
-        form = AddMinionForm(request.POST, request.FILES)
-        if form.is_valid():
-            # print(form.cleaned_data)
-            # try:
-            #     Minion.objects.create(**form.cleaned_data)
-            #     return redirect('home')
-            # except:
-            #     form.add_error(None, 'Ошибка')
-            form.save()
-            return redirect('home')
-    else:
-        form = AddMinionForm()
-    data = {
-        'menu': menu,
-        'title': 'Добавление пузыречка',
-        'form': form,
-    }
-    return render(request, 'bottle/addminion.html', context=data)
+class AddMinion(DataMixin, CreateView):
+    form_class = AddMinionForm
+    template_name = 'bottle/addminion.html'
+    title_page = 'Добавление миньёна'
+
+
+class UpdateMinion(DataMixin, UpdateView):
+    model = Minion
+    fields = ['name', 'description', 'photo', 'country', 'manufacturer', 'cat']
+    template_name = 'bottle/addminion.html'
+    success_url = reverse_lazy('home')
+    title_page = 'Редактирование миньёна'
+
+
+class DeleteMinion(DataMixin, DeleteView):
+    model = Minion
+    success_url = reverse_lazy('home')
+    title_page = f'Удаление'
 
 
 def contact(request):
@@ -89,32 +75,36 @@ def login(request):
     return HttpResponse('Авторизация')
 
 
-def show_category(request, cat_slug):
-    category = get_object_or_404(Category, slug=cat_slug)
-    minions = Minion.manager.filter(cat_id=category.pk).select_related('cat')
+class MinionCategory(DataMixin, ListView):
+    template_name = 'bottle/index.html'
+    context_object_name = 'minions'
+    allow_empty = False
 
-    data = {
-        'title': category.name,
-        'menu': menu,
-        'minions': minions,
-        'cat_selected': category.pk,
-    }
-    return render(request, 'bottle/index.html', context=data)
+    def get_queryset(self):
+        return Minion.manager.filter(cat__slug=self.kwargs['cat_slug']).select_related('cat')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        cat = context['minions'][0].cat
+        return self.get_mixin_context(context,
+                                      title='Категория - ' + cat.name,
+                                      cat_selected=cat.pk
+                                      )
 
 
 def page_not_found(request, exception):
     return HttpResponseNotFound('<h1>Страница не найдена</h1>')
 
 
-def show_tag_minionlist(request, tag_slug):
-    tag = get_object_or_404(TagMinion, slug=tag_slug)
-    minions = tag.tags.filter(is_active=Minion.StatusPhoto.YES).select_related('cat')
+class MinionTags(DataMixin, ListView):
+    template_name = 'bottle/index.html'
+    context_object_name = 'minions'
+    allow_empty = False
 
-    data = {
-        'title': f'Тэг: {tag.tag}',
-        'menu': menu,
-        'minions': minions,
-        'cat_selected': None,
-    }
+    def get_queryset(self):
+        return Minion.manager.filter(tags__slug=self.kwargs['tag_slug']).select_related('cat')
 
-    return render(request, 'bottle/index.html', context=data)
+    def get_context_data(self, *, object_list=None, **kwargs):
+        context = super().get_context_data(**kwargs)
+        tag = TagMinion.objects.get(slug=self.kwargs['tag_slug'])
+        return self.get_mixin_context(context, title='Тег - ' + tag.tag)

@@ -2,13 +2,13 @@ from django.db import models
 from django.urls import reverse
 
 
-class PhotoNoneManager(models.Manager):
+class ActivManager(models.Manager):
     def get_queryset(self):
-        return super().get_queryset().filter(is_active=Minion.StatusPhoto.YES)
+        return super().get_queryset().filter(is_active=Minion.Status.YES)
 
 
 class Minion(models.Model):
-    class StatusPhoto(models.IntegerChoices):
+    class Status(models.IntegerChoices):
         NO = 0, 'Не активный'
         YES = 1, 'Активный'
 
@@ -24,15 +24,15 @@ class Minion(models.Model):
     country = models.CharField(max_length=255, verbose_name='Место производства', blank=True, null=True)
     manufacturer = models.CharField(max_length=50, verbose_name='Завод изготовитель', blank=True, null=True)
     price = models.IntegerField(verbose_name='Цена миньёна')
-    is_active = models.BooleanField(choices=tuple(map(lambda x: (bool(x[0]), x[1]), StatusPhoto.choices)),
-                                verbose_name='Ствтус', default=StatusPhoto.NO)
+    is_active = models.BooleanField(choices=tuple(map(lambda x: (bool(x[0]), x[1]), Status.choices)),
+                                verbose_name='Стaтус', default=Status.NO)
     cat = models.ForeignKey('Category', on_delete=models.PROTECT, related_name='minions')
-    tags = models.ManyToManyField('TagMinion', blank=True, related_name='tags')
+    tags = models.ManyToManyField('TagMinion', blank=True, related_name='minions')
     bigminion = models.OneToOneField('BigMinion', on_delete=models.SET_NULL, null=True, blank=True,
                                      related_name='minon')
 
     objects = models.Manager()
-    manager = PhotoNoneManager()
+    manager = ActivManager()
 
     def __str__(self):
         return self.name

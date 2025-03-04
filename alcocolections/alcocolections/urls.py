@@ -22,12 +22,14 @@ from django.urls import path, include
 from bottle.views import page_not_found
 from debug_toolbar.toolbar import debug_toolbar_urls
 
-urlpatterns = [
+urlpatterns = ([
     path('admin/', admin.site.urls),
-    path('', include('bottle.urls'))
-] + debug_toolbar_urls() + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+    path('', include('bottle.urls')),
+    # path("__debug__", include("debug_toolbar.urls"))
+] + debug_toolbar_urls()
+               + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT))
 
 handler404 = page_not_found
 
 admin.site.site_header = 'Панель администратора'
-admin.site.index_title = 'Все миньены'
+admin.site.index_title = 'Моя коллекция Миньёнов'
