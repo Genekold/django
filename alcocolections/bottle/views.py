@@ -1,6 +1,7 @@
 import uuid
 
 from django.contrib import messages
+from django.core.paginator import Paginator
 from django.http import HttpResponse, HttpResponseNotFound, Http404, HttpResponseRedirect, HttpResponsePermanentRedirect
 from django.shortcuts import redirect, render, get_object_or_404
 from django.template.loader import render_to_string
@@ -24,14 +25,12 @@ class MinionHome(DataMixin, ListView):
 
 
 def about(request):
-    if request.method == "POST":
-        form = UploadFileForm(request.POST, request.FILES)
-        if form.is_valid():
-            fp = UploadFiles(file=form.cleaned_data['file'])
-            fp.save()
-    else:
-        form = UploadFileForm()
-    return render(request, 'bottle/about.html', {'title': 'О сайте', 'form': form})
+    minion = Minion.manager.all()
+    paginator = Paginator(minion, 3, orphans=2)
+
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    return render(request, 'bottle/about.html', {'title': 'О сайте', 'page_obj': page_obj})
 
 
 class ShowMinion(DataMixin, DetailView):
@@ -79,6 +78,7 @@ class MinionCategory(DataMixin, ListView):
     template_name = 'bottle/index.html'
     context_object_name = 'minions'
     allow_empty = False
+
 
     def get_queryset(self):
         return Minion.manager.filter(cat__slug=self.kwargs['cat_slug']).select_related('cat')
