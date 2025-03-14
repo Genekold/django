@@ -1,6 +1,8 @@
 import uuid
 
 from django.contrib import messages
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.paginator import Paginator
 from django.http import HttpResponse, HttpResponseNotFound, Http404, HttpResponseRedirect, HttpResponsePermanentRedirect
 from django.shortcuts import redirect, render, get_object_or_404
@@ -24,6 +26,7 @@ class MinionHome(DataMixin, ListView):
         return Minion.manager.all().prefetch_related('cat')
 
 
+@login_required()
 def about(request):
     minion = Minion.manager.all()
     paginator = Paginator(minion, 3, orphans=2)
@@ -46,10 +49,15 @@ class ShowMinion(DataMixin, DetailView):
         return get_object_or_404(Minion.manager, slug=self.kwargs[self.slug_url_kwarg])
 
 
-class AddMinion(DataMixin, CreateView):
+class AddMinion(LoginRequiredMixin, DataMixin, CreateView):
     form_class = AddMinionForm
     template_name = 'bottle/addminion.html'
     title_page = 'Добавление миньёна'
+
+    def form_valid(self, form):
+        m = form.save(commit=False)
+        m.autor = self.request.user
+        return super().form_valid(form)
 
 
 class UpdateMinion(DataMixin, UpdateView):

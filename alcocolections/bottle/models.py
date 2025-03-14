@@ -1,3 +1,4 @@
+from django.contrib.auth import get_user_model
 from django.db import models
 from django.urls import reverse
 
@@ -30,6 +31,7 @@ class Minion(models.Model):
     tags = models.ManyToManyField('TagMinion', blank=True, related_name='minions')
     bigminion = models.OneToOneField('BigMinion', on_delete=models.SET_NULL, null=True, blank=True,
                                      related_name='minon')
+    autor = models.ForeignKey(get_user_model(), on_delete=models.SET_DEFAULT, related_name='minions', null=True, default=None)
 
     objects = models.Manager()
     manager = ActivManager()

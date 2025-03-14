@@ -6,7 +6,7 @@
 
     <li>
         <div class="article-panel">
-            <p class="first">{{ minion.cat.name }}</p>
+            <p class="first">Категория: {{ minion.cat.name }} | Автор: {{ minion.autor|default:"Неизвестен" }}</p>
             <p class="last">Дата регистрации: {{ minion.date_reg|date:"d-m-Y H:m:s" }}</p>
         </div>
         {% if minion.photo %}
